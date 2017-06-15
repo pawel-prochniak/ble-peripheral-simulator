@@ -60,6 +60,13 @@
     <string name="notificationsEnabled">Notifications enabled</string>
     <string name="notificationsNotEnabled">Notifications not enabled</string>
 
+    <!-- Accelerometer Service -->
+    <string name="accelerometer_service_name">Accelerometer service</string>
+    <string name="x_char_string">X value:</string>
+    <string name="y_char_string">Y value:</string>
+    <string name="z_char_string">Z value:</string>
+
+
     <string name="status_noLeAdv">LE Advertising is not available. Please pair with a device to be
         discoverable.
     </string>
