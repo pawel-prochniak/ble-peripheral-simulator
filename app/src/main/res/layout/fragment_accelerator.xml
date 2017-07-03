@@ -64,5 +64,5 @@
         android:layout_height="wrap_content"
         android:text="@string/notify"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/batteryLevel"/>
+        android:layout_below="@id/z_layout"/>
 </RelativeLayout>
