@@ -156,7 +156,6 @@ public class Peripheral extends Activity implements ServiceFragmentDelegate {
     @Override
     public void onNotificationSent(BluetoothDevice device, int status) {
       super.onNotificationSent(device, status);
-      Log.v(TAG, "Notification sent. Status: " + status);
     }
 
     @Override
@@ -330,8 +329,7 @@ public class Peripheral extends Activity implements ServiceFragmentDelegate {
       ensureBleFeaturesAvailable();
       return;
     }
-    // Add a service for a total of three services (Generic Attribute and Generic Access
-    // are present by default).
+
     mGattServer.addService(mBluetoothGattService);
 
     if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
@@ -372,7 +370,7 @@ public class Peripheral extends Activity implements ServiceFragmentDelegate {
         == BluetoothGattCharacteristic.PROPERTY_INDICATE;
     for (BluetoothDevice device : mBluetoothDevices) {
       // true for indication (acknowledge) and false for notification (unacknowledge).
-      mGattServer.notifyCharacteristicChanged(device, characteristic, indicate);
+      if (device != null) mGattServer.notifyCharacteristicChanged(device, characteristic, indicate);
     }
   }
 

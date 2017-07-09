@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import java.util.Random;
@@ -176,5 +177,36 @@ public class AccelerometerServiceFragment extends ServiceFragment {
         serviceFragmentDelegate.sendNotificationToDevices(xAccCharacteristic);
         serviceFragmentDelegate.sendNotificationToDevices(yAccCharacteristic);
         serviceFragmentDelegate.sendNotificationToDevices(zAccCharacteristic);
+    }
+
+    @Override
+    public void notificationsEnabled(BluetoothGattCharacteristic characteristic, boolean indicate) {
+        if (characteristic.getUuid() != ACC_X && characteristic.getUuid() != ACC_Y && characteristic.getUuid() != ACC_Z) {
+            return;
+        }
+        if (indicate) {
+            return;
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), R.string.notificationsEnabled, Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+    }
+
+    @Override
+    public void notificationsDisabled(BluetoothGattCharacteristic characteristic) {
+        if (characteristic.getUuid() != ACC_X && characteristic.getUuid() != ACC_Y && characteristic.getUuid() != ACC_Z) {
+            return;
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), R.string.notificationsNotEnabled, Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
     }
 }
