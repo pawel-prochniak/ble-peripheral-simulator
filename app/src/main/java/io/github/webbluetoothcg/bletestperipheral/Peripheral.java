@@ -370,6 +370,7 @@ public class Peripheral extends Activity implements ServiceFragmentDelegate {
         == BluetoothGattCharacteristic.PROPERTY_INDICATE;
     for (BluetoothDevice device : mBluetoothDevices) {
       // true for indication (acknowledge) and false for notification (unacknowledge).
+
       if (device != null) mGattServer.notifyCharacteristicChanged(device, characteristic, indicate);
     }
   }

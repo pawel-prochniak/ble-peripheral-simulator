@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Random;
 import java.util.UUID;
 
@@ -29,6 +31,11 @@ public class AccelerometerServiceFragment extends ServiceFragment {
     public static final UUID ACC_Y = UUID.fromString("0000A102-0000-1000-8000-00805f9b34fc");
     public static final UUID ACC_Z = UUID.fromString("0000A102-0000-1000-8000-00805f9b34fd");
 
+    private static final int EXPONENT_MASK = 0x7f800000;
+    private static final int EXPONENT_SHIFT = 23;
+    private static final int MANTISSA_MASK = 0x007fffff;
+    private static final int MANTISSA_SHIFT = 0;
+
     // GATT
     private BluetoothGattService sensorReadService;
     private BluetoothGattCharacteristic xAccCharacteristic, yAccCharacteristic, zAccCharacteristic;
@@ -43,7 +50,7 @@ public class AccelerometerServiceFragment extends ServiceFragment {
     private TextView xValueText, yValueText, zValueText;
     private Button notifyButton;
 
-    int xValue, yValue, zValue;
+    float xValue, yValue, zValue;
 
     private View.OnClickListener notifyButtonListener = new View.OnClickListener() {
         @Override
@@ -156,27 +163,50 @@ public class AccelerometerServiceFragment extends ServiceFragment {
     }
 
     private void randomizeValues() {
-        xValue = randomGenerator.nextInt(Integer.MAX_VALUE);
-        yValue = randomGenerator.nextInt(Integer.MAX_VALUE);
-        zValue = randomGenerator.nextInt(Integer.MAX_VALUE);
+//        xValue = (float) (randomGenerator.nextInt(4092)*(Math.pow(-1,randomGenerator.nextInt(2)))*0.0039*9.80665);
+//        yValue = (float) (randomGenerator.nextInt(4092)*(Math.pow(-1,randomGenerator.nextInt(2)))*0.0039*9.80665);
+//        zValue = (float) (randomGenerator.nextInt(4092)*(Math.pow(-1,randomGenerator.nextInt(2)))*0.0039*9.80665);
+
+        xValue = (float) (randomGenerator.nextFloat()*16*(Math.pow(-1,randomGenerator.nextInt(2))));
+        yValue = (float) (randomGenerator.nextFloat()*16*(Math.pow(-1,randomGenerator.nextInt(2))));
+        zValue = (float) (randomGenerator.nextFloat()*16*(Math.pow(-1,randomGenerator.nextInt(2))));
     }
 
     private void updateCharacteristics() {
-        xAccCharacteristic.setValue(xValue, BluetoothGattCharacteristic.FORMAT_UINT16, 0);
-        yAccCharacteristic.setValue(yValue, BluetoothGattCharacteristic.FORMAT_UINT16, 0);
-        zAccCharacteristic.setValue(zValue, BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+        byte[] xBytes = getReversedBytesFromFloat(xValue);
+        byte[] yBytes = getReversedBytesFromFloat(yValue);
+        byte[] zBytes = getReversedBytesFromFloat(zValue);
+
+        xAccCharacteristic.setValue(xBytes);
+        yAccCharacteristic.setValue(yBytes);
+        zAccCharacteristic.setValue(zBytes);
     }
 
     private void updateTextValues() {
-        xValueText.setText(xValue);
-        yValueText.setText(yValue);
-        zValueText.setText(zValue);
+        xValueText.setText(String.valueOf(xValue));
+        yValueText.setText(String.valueOf(yValue));
+        zValueText.setText(String.valueOf(zValue));
     }
 
     private void sendNotifications() {
         serviceFragmentDelegate.sendNotificationToDevices(xAccCharacteristic);
         serviceFragmentDelegate.sendNotificationToDevices(yAccCharacteristic);
         serviceFragmentDelegate.sendNotificationToDevices(zAccCharacteristic);
+    }
+
+    private int[] getMantissaExponentFromFloat(float val) {
+        int bits = Float.floatToIntBits(val);
+        int exponent = (bits & EXPONENT_MASK) >>> EXPONENT_SHIFT;
+        int mantissa = (bits & MANTISSA_MASK) >>> MANTISSA_SHIFT;
+        int formatted[] = new int[2];
+        formatted[0] = mantissa;
+        formatted[1] = exponent;
+
+        return formatted;
+    }
+
+    private byte[] getReversedBytesFromFloat(float val) {
+        return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putFloat(val).array();
     }
 
     @Override
